@@ -9,7 +9,7 @@ from django.contrib.auth import logout as auth_logout, authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import login as auth_login_view, logout as auth_logout_view
 from django.shortcuts import redirect, render_to_response, resolve_url
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django import forms
 from django.template import RequestContext
 from oic.oic.message import IdToken
