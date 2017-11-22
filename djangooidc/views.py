@@ -134,15 +134,38 @@ def logout(request, next_page=None):
 
     # Redirect client to the OP logout page
     try:
+        # DP HACK: Needed to get logout to actually logout from the OIDC Provider
+        # According to ODIC session spec (http://openid.net/specs/openid-connect-session-1_0.html#RPLogout)
+        # the user should be directed to the OIDC provider to logout after being
+        # logged out here.
+
+        request_args = {
+            'id_token_hint': request.session['access_token'],
+            'state': request.session['state'],
+        }
+        request_args.update(extra_args) # should include the post_logout_redirect_uri
+
+        # id_token iss is the token issuer, the url of the issuing server
+        # the full url works for the BOSS OIDC Provider, not tested on any other provider
+        url = request.session['id_token']['iss'] + "/protocol/openid-connect/logout"
+        url += "?" + urlencode(request_args)
+        return HttpResponseRedirect(url)
+
+        # Looks like they are implementing back channel logout, without checking for
+        # support?
+        # http://openid.net/specs/openid-connect-backchannel-1_0.html#Backchannel
+        """
         request_args = None
         if 'id_token' in request.session.keys():
             request_args = {'id_token': IdToken(**request.session['id_token'])}
         res = client.do_end_session_request(state=request.session["state"],
                                             extra_args=extra_args, request_args=request_args)
-        resp = HttpResponse(content_type=res.headers["content-type"], status=res.status_code, content=res._content)
+        content_type = res.headers.get("content-type", "text/html") # In case the logout response doesn't set content-type (Seen with Keycloak)
+        resp = HttpResponse(content_type=content_type, status=res.status_code, content=res._content)
         for key, val in res.headers.items():
             resp[key] = val
         return resp
+        """
     finally:
         # Always remove Django session stuff - even if not logged out from OP. Don't wait for the callback as it may never come.
         auth_logout(request)
