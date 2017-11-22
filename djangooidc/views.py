@@ -2,6 +2,7 @@
 
 import logging
 from urlparse import parse_qs
+from urllib import urlencode
 
 from django.conf import settings
 from django.contrib.auth import logout as auth_logout, authenticate, login
