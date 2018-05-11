@@ -88,7 +88,7 @@ def authz_cb(request):
         query = parse_qs(request.META['QUERY_STRING'])
         userinfo = client.callback(query, request.session)
         request.session["userinfo"] = userinfo
-        user = authenticate(**userinfo)
+        user = authenticate(request=request, **userinfo)
         if user:
             login(request, user)
             return redirect(request.session["next"])
