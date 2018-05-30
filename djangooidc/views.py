@@ -142,7 +142,8 @@ def logout(request, next_page=None):
             request_args = {'id_token': IdToken(**request.session['id_token'])}
         res = client.do_end_session_request(state=request.session["state"],
                                             extra_args=extra_args, request_args=request_args)
-        resp = HttpResponse(content_type=res.headers["content-type"], status=res.status_code, content=res._content)
+        # resp = HttpResponse(content_type=res.headers["content-type"], status=res.status_code, content=res._content)
+        resp = HttpResponse(status=res.status_code, content=res._content)
         for key, val in res.headers.items():
             resp[key] = val
         return resp
